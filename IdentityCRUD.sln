@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33424.131
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityCRUD", "IdentityCRUD\IdentityCRUD.csproj", "{57949245-60A9-4B0A-85A1-4849CB45E565}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57949245-60A9-4B0A-85A1-4849CB45E565}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57949245-60A9-4B0A-85A1-4849CB45E565}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57949245-60A9-4B0A-85A1-4849CB45E565}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57949245-60A9-4B0A-85A1-4849CB45E565}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91B5DF38-62A5-4172-8108-93B6B3926AB3}
+	EndGlobalSection
+EndGlobal
