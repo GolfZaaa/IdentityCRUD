@@ -1,5 +1,6 @@
 ﻿using IdentityCRUD.DTOs;
 using IdentityCRUD.Models;
+using IdentityCRUD.Services.RoleService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +12,13 @@ namespace IdentityCRUD.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IRoleService _roleService;
 
-        public RoleController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public RoleController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager,IRoleService roleService)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
+            _roleService = roleService;
         }
 
         /// Start MyEdit
@@ -70,93 +73,39 @@ namespace IdentityCRUD.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> Get()
         {
-            var result = await roleManager.Roles.ToListAsync();
+            var result = await _roleService.GetAllRolesAsync();
             return Ok(result);
         }
 
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> Update(RoleUpdateDto roleUpdateDto)
-        {
-            var identityRole = await roleManager.FindByNameAsync(roleUpdateDto.RoleName);
 
-
-            if (identityRole == null) return NotFound();
-
-
-            identityRole.Name = roleUpdateDto.UpdateName;
-            identityRole.NormalizedName = roleManager.NormalizeKey(roleUpdateDto.UpdateName);
-
-
-            var result = await roleManager.UpdateAsync(identityRole);
-
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
-            }
-            return StatusCode(201);
-        }
 
 
 
         [HttpPost("[action]")]
         public async Task<IActionResult> Create(RoleDto roleDto)
         {
-            var identityRole = new IdentityRole
-            {
-                Name = roleDto.RoleName,
-                NormalizedName = roleManager.NormalizeKey(roleDto.RoleName)
-            };
+            var Cre = await _roleService.CreateRoleAsync(roleDto);
 
-
-            var result = await roleManager.CreateAsync(identityRole);
-
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
-            }
-
-
-            return StatusCode(201);
+            return Ok(Cre);
         }
 
+        [HttpPut("[action]")]
+        public async Task<IActionResult> Update(RoleUpdateDto roleUpdateDto)
+        {
+            var Upda = await _roleService.UpdateRoleAsync(roleUpdateDto);
+
+            return Ok(Upda);
+        }
 
 
 
         [HttpDelete]
         public async Task<IActionResult> Delete(RoleDto roleDto)
         {
-            var identityRole = await roleManager.FindByNameAsync(roleDto.RoleName);
+           var Del = await _roleService.DeleteRoleAsync(roleDto);
 
-            if (identityRole == null) return NotFound();
-
-            //ตรวจสอบมีผู้ใช้บทบาทนี้หรือไม่
-            var usersInRole = await userManager.GetUsersInRoleAsync(roleDto.RoleName);
-            if (usersInRole.Count != 0) return BadRequest();
-
-
-            var result = await roleManager.DeleteAsync(identityRole);
-
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
-            }
-            return StatusCode(201);
+            return Ok(Del);
         }
 
 

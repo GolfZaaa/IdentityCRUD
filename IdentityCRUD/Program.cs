@@ -3,6 +3,8 @@ global using Microsoft.EntityFrameworkCore;
 using IdentityCRUD.Data;
 using IdentityCRUD.Models;
 using IdentityCRUD.Services;
+using IdentityCRUD.Services.AccService;
+using IdentityCRUD.Services.RoleService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -53,6 +55,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 builder.Services.AddScoped<TokenService>();
+
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthorization();
 

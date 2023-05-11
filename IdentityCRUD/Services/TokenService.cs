@@ -20,13 +20,16 @@ namespace IdentityCRUD.Services
 
         public async Task<string> GenerateToken(ApplicationUser user)
         {
-            //Claim คือข้อมูลที่เราต้องการนำมาเก็บไว้ในตั๋ว สำหรับใช้ยืนยันตัวตน
+            //อ่านค่ารหัสลับ และกำหนดอัลกอริทึมการเข้ารหัส
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTSettings:TokenKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email,"Nawapol@1.com"),
+                new Claim("Favorite","Game"),
             };
-
 
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -36,12 +39,6 @@ namespace IdentityCRUD.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-
-
-            //อ่านค่ารหัสลับ และกำหนดอัลกอริทึมการเข้ารหัส
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTSettings:TokenKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-
 
             //รวบรวมค่าต่างๆ สำหรับบรรจุไว้ใน container Token
             var tokenOptions = new JwtSecurityToken
