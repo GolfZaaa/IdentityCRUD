@@ -35,7 +35,7 @@ namespace IdentityCRUD.Controllers
         {
             var res = await _productService.CreateAsync(productRequest);
 
-            if ( !res ) return BadRequest("Create Not Success");
+            if ( res is not null) return BadRequest(res);
 
             return StatusCode(StatusCodes.Status201Created);
         }
