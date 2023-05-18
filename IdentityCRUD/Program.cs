@@ -1,4 +1,5 @@
 global using Microsoft.AspNetCore.Identity;
+global using AutoMapper;
 global using Microsoft.EntityFrameworkCore;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<TokenService>();
 //builder.Services.AddScoped<IRoleService, RoleService>();
 //builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddAuthorization();
 

@@ -24,7 +24,10 @@ namespace IdentityCRUD.Controllers
         public async Task<IActionResult> Get()
         {
             var g = await _productService.GetProductListAsync();
-            return Ok(g);
+            //Select สามมารถเขียนได้ 2 แบบ 
+            //var response = g.Select(ProductResponse.FromProduct).ToList();
+            var response = g.Select(a => ProductResponse.FromProduct(a)).ToList();
+            return Ok(response);
         }
 
         [HttpPost("[action]")]
@@ -37,6 +40,35 @@ namespace IdentityCRUD.Controllers
             return StatusCode(StatusCodes.Status201Created);
         }
 
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateProduct([FromForm] ProductRequest productRequest)
+        {
+            var foundid = await _productService.GetProductByIDAsync((int)productRequest.Id);
+
+            if (foundid is null) return NotFound();
+
+            var res = await _productService.UpdateAsync(productRequest);
+
+            if (!res) return BadRequest("Update Not Success");
+
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct( int id)
+        {
+            var response = await _productService.GetProductByIDAsync(id);
+
+            if (response is null) return NotFound();
+
+            var res = await _productService.DeleteAsync(response);
+
+            if (!res) return BadRequest("Delete Not Success");
+
+            return Ok();
+        }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetType()
         {
@@ -44,5 +76,14 @@ namespace IdentityCRUD.Controllers
 
             return Ok(res);
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> SearchProduct([FromQuery]string name="")
+        {
+            var res = (await _productService.SearchAsync(name)).Select(ProductResponse.FromProduct).ToList();
+
+            return Ok(res);
+        }
+
     }
 }
