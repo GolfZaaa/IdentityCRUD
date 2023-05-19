@@ -25,6 +25,14 @@ namespace IdentityCRUD.Services.ProductManage
 
         public async Task<bool> DeleteAsync(Product product)
         {
+
+            var files = await _dataContext.ProductImages.Where(a => a.ProductId == product.Id).Select(a => a.Image).ToListAsync();
+            
+            if (files.Count > 0)
+            {
+                await _uploadFileService.DeleteFileImages(files);
+            }
+
             _dataContext.Products.Remove(product);
 
             var result = await _dataContext.SaveChangesAsync();
@@ -199,9 +207,22 @@ namespace IdentityCRUD.Services.ProductManage
             return (errorMessage, imageNames);
         }
 
+        public async Task DeleteOneWay(int productid)
+        {
+            var product = await _dataContext.Products.FindAsync(productid);
+
+            if (product == null) return;
+
+            var files = await _dataContext.ProductImages.Where(a => a.ProductId == productid).Select(a => a.Image).ToListAsync();
+            if (files.Count > 0)
+            {
+                await _uploadFileService.DeleteFileImages(files);
+            }
+
+            _dataContext.Products.Remove(product);
+            await _dataContext.SaveChangesAsync();
 
 
-
-
+        }
     }
 }

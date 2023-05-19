@@ -55,6 +55,7 @@ namespace IdentityCRUD.Controllers
             return Ok();
         }
 
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct( int id)
         {
@@ -68,6 +69,8 @@ namespace IdentityCRUD.Controllers
 
             return Ok();
         }
+
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetType()
@@ -83,6 +86,14 @@ namespace IdentityCRUD.Controllers
             var res = (await _productService.SearchAsync(name)).Select(ProductResponse.FromProduct).ToList();
 
             return Ok(res);
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteProductOneWay(int id)
+        {
+              await _productService.DeleteOneWay(id);
+
+            return Ok();
         }
 
     }

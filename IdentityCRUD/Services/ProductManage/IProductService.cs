@@ -15,5 +15,6 @@ namespace IdentityCRUD.Services.ProductManage
         Task<Product> GetProductByIDAsync(int productid);
         Task<List<Product>> SearchAsync(string name);
         Task<(string errorMessage, List<string> imageNames)> UploadImageAsync(IFormFileCollection formFiles);
+        Task DeleteOneWay (int productid);
     }
 }
