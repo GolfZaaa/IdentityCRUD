@@ -10,7 +10,7 @@ namespace IdentityCRUD.Services.ProductManage
         Task<List<Product>> GetProductListAsync();
         Task<string> CreateAsync(ProductRequest request);
         Task<List<string>> GetTypeAsync();
-        Task <Boolean>UpdateAsync(ProductRequest request);
+        Task <string>UpdateAsync(ProductRequest request);
         Task <Boolean>DeleteAsync(Product product);
         Task<Product> GetProductByIDAsync(int productid);
         Task<List<Product>> SearchAsync(string name);

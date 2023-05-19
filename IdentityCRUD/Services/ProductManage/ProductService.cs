@@ -15,39 +15,17 @@ namespace IdentityCRUD.Services.ProductManage
         private readonly IMapper _mapper;
         private readonly DataContext _dataContext;
 
-        public ProductService(IUploadFileService uploadFileService,IMapper mapper, DataContext dataContext)
+        public ProductService(IUploadFileService uploadFileService, IMapper mapper, DataContext dataContext)
         {
             _uploadFileService = uploadFileService;
             _mapper = mapper;
             _dataContext = dataContext;
         }
 
-        public async Task<string> CreateAsync(ProductRequest productrequest)
-        {
-
-            (string errorMessage, List<string> imageNames) = await UploadImageAsync(productrequest.FormFiles);
-
-            if (!string.IsNullOrEmpty(errorMessage)) return errorMessage;
-
-
-
-            var product = _mapper.Map<Product>(productrequest);
-             await _dataContext.Products.AddAsync(product);
-             var resultProduct = await _dataContext.SaveChangesAsync();
-
-
-            var image = new List<ProductImage>();
-            imageNames.ForEach(imageName => image.Add(new ProductImage {ProductId = product.Id,Image = imageName}));
-             await _dataContext.ProductImages.AddRangeAsync(image);
-            var ResultproductImage = await _dataContext.SaveChangesAsync();
-
-            if (resultProduct > 0 && ResultproductImage > 0 ) return null;
-            return "Create Not Success";
-        }
 
         public async Task<bool> DeleteAsync(Product product)
         {
-             _dataContext.Products.Remove(product);
+            _dataContext.Products.Remove(product);
 
             var result = await _dataContext.SaveChangesAsync();
 
@@ -86,22 +64,121 @@ namespace IdentityCRUD.Services.ProductManage
             //สามารถเขียนได้ 2 แบบอันนี้เป็นการ Include เพื่อหาชื่อขอวภาพ
             //var search = await _dataContext.Products.Include(a => a.ProductImages).Where(a => a.Name == name).ToListAsync();
             var search = await _dataContext.Products.Include(a => a.ProductImages).Where(a => a.Name.Contains(name)).ToListAsync();
-            
+
             return search;
         }
 
-        public async Task<bool> UpdateAsync(ProductRequest productrequest)
+
+        //public async Task<string> CreateAsync(ProductRequest productrequest)
+        //{
+
+        //    (string errorMessage, List<string> imageNames) = await UploadImageAsync(productrequest.FormFiles);
+        //    if (!string.IsNullOrEmpty(errorMessage)) return errorMessage;
+
+        //    var product = _mapper.Map<Product>(productrequest);
+        //     await _dataContext.Products.AddAsync(product);
+        //     var resultProduct = await _dataContext.SaveChangesAsync();
+
+
+        //    int ResultproductImage = 0;
+        //    if (imageNames.Count > 0 && ResultproductImage > 0)
+        //    {
+        //        var image = new List<ProductImage>();
+        //        imageNames.ForEach(imageName => image.Add(new ProductImage
+        //        {
+        //            ProductId = product.Id,
+        //            Image = imageName
+        //        }
+        //        ));
+        //        await _dataContext.ProductImages.AddRangeAsync(image);
+        //         ResultproductImage = await _dataContext.SaveChangesAsync();
+        //        if (ResultproductImage > 0) return null;
+        //        return "Create Product Image not Successfuly";
+
+        //    }
+
+        //    if (resultProduct > 0)  return null;
+        //    return "Create Product not Success";
+        //}
+
+
+        //อีกรูปแบบหนึ่งของ Create
+        public async Task<string> CreateAsync(ProductRequest productrequest)
         {
 
+            (string errorMessage, List<string> imageNames) = await UploadImageAsync(productrequest.FormFiles);
+            if (!string.IsNullOrEmpty(errorMessage)) return errorMessage;
+
             var product = _mapper.Map<Product>(productrequest);
+            await _dataContext.Products.AddAsync(product);
+            var resultProduct = await _dataContext.SaveChangesAsync();
 
+            if (resultProduct <= 0) return "Create Product not Success";
+
+
+            if (imageNames.Count > 0)
+            {
+                var image = new List<ProductImage>();
+                imageNames.ForEach(imageName => image.Add(new ProductImage
+                {
+                    ProductId = product.Id,
+                    Image = imageName
+                }
+                ));
+                await _dataContext.ProductImages.AddRangeAsync(image);
+                var ResultproductImage = await _dataContext.SaveChangesAsync();
+                if (ResultproductImage <= 0) return "Create ProductImage not Successfuly";
+            }
+            return null;
+        }
+
+        public async Task<string> UpdateAsync(ProductRequest productrequest)
+        {
+            (string errorMessage, List<string> imageNames) = await UploadImageAsync(productrequest.FormFiles);
+            if (!string.IsNullOrEmpty(errorMessage)) return errorMessage;
+
+            //UpdateProduct
+            var product = _mapper.Map<Product>(productrequest);
             _dataContext.Products.Update(product);
+            var resultProduct = await _dataContext.SaveChangesAsync();
+            if (resultProduct <= 0) return "Updated Product is not Success";
 
-            var result = await _dataContext.SaveChangesAsync();
+            //End UpdateProduct
 
-            if (result > 0) return true;
+            //Update ProductImage
+            if (imageNames.Count > 0)
+            {
+                // Delete Old Files
+                var productImage = await _dataContext.ProductImages.Where(a => a.ProductId.Equals(product.Id)).ToListAsync();
+                if (productImage is not null)
+                {
+                    //Delete Database
+                    _dataContext.ProductImages.RemoveRange(productImage);
+                    _dataContext.SaveChangesAsync().Wait();
 
-            return false;
+                    //Delete Files
+                    var files = productImage.Select(a => a.Image).ToList();
+                    await _uploadFileService.DeleteFileImages(files);
+                }
+                // End Delete
+
+                #region Add new Files to ProductImage
+                //Add to Database
+                var image = new List<ProductImage>();
+                imageNames.ForEach(imageName => image.Add(new ProductImage
+                {
+                    ProductId = product.Id,
+                    Image = imageName
+                }));
+                await _dataContext.ProductImages.AddRangeAsync(image);
+                var ResultproductImage = await _dataContext.SaveChangesAsync();
+                if (ResultproductImage <= 0) return "Update ProductImage not Successfuly";
+
+
+                #endregion End Add new File
+            }
+            //End Update ProductImage
+            return null;
 
         }
 

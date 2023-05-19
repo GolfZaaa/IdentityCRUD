@@ -50,7 +50,7 @@ namespace IdentityCRUD.Controllers
 
             var res = await _productService.UpdateAsync(productRequest);
 
-            if (!res) return BadRequest("Update Not Success");
+            if (res is not null) return BadRequest(res);
 
             return Ok();
         }
